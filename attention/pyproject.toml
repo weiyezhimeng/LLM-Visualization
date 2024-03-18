@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "attention"
+version = "0.0.0"
+description = ""
+authors = ["Matt Neary <neary.matt@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+transformers = "^4.29.0"
+torch = "^2.0.1"
+flask = "^2.3.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
