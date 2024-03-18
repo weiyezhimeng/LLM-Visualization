@@ -8,8 +8,9 @@
 ```sh
 $ cd attention
 $ pip install poetry
-//说实话在`https://github.com/mattneary/attention`之前都不知道poetry是什么。。。
+//说实话在https://github.com/mattneary/attention之前都不知道poetry是什么。。。
 $ poetry install
+cd attention/wow
 $ python main.py
 在服务器上部署代码后运行，一般来说会转发到本地的5000端口
 ```
