@@ -1,8 +1,13 @@
-# Attention
+# attention
 
 为了更好地研究LLM推理的因果关系，我在`https://github.com/mattneary/attention`的基础上
  - 适配了更多的大模型
  - 加入了模型不同layer，不同head的attention
+ - 仅支持选择单个token
+
+# attention_ave
+
+由于一次性上传了所有结果，长文本会导致attention内存爆炸，下次修订时会修改交互逻辑，使每一次选择文本时仅上传相应部分attention。因此上传attention_ave，基本和`https://github.com/mattneary/attention`一致。
 
 ## How to Run
 ```sh
