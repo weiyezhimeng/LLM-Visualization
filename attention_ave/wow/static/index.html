@@ -1,0 +1,149 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf8" />
+    <title>Attention</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js" integrity="sha512-VW8/i4IZkHxdD8OlqNdF7fGn3ba0+lYqag+Uy4cG6BtJ/LIr8t23s/vls70pQ41UasHH0tL57GQfKDApqc9izA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+      p {
+        width: 700px;
+        margin: 1em auto;
+        color: #0d0d0d;
+        font-family: sans-serif;
+        font-size: 20px;
+        line-height: 1.5em;
+      }
+      h1 {
+        width: 700px;
+        text-align: center;
+        margin: 1em auto;
+        margin-bottom: 0;
+      }
+      span {
+        --attention: 0;
+        background-color: rgba(0, 0, 255, var(--attention));
+      }
+      span.prompt {
+        --attention: 0;
+        background-color: rgba(0, 0, 255, var(--attention));
+        -webkit-user-select: none;  /* Safari */
+        -moz-user-select: none;     /* Firefox */
+        -ms-user-select: none;      /* Internet Explorer/Edge */
+        user-select: none;          /* standard */
+      }
+      select {
+        font-size: 16px;
+      }
+      button{
+        font-size: 16px;
+      }
+      .centered-container {
+        margin: auto;
+        width: fit-content;
+      }
+      form{
+        margin: auto;
+        width: fit-content;
+      }
+
+    </style>
+  </head>
+  <body>
+    <h1>Attention Tracing</h1>
+    <div class="centered-container">
+      <div  style="background: rgb(0, 83, 214); color: white;"><input type="checkbox" id="ave_attention">Ave attention</div>
+    </div>
+
+    <form id="model_form" action="/model_path" method="post">
+      Model path:
+      <input type="text" id="model_path" name="model_path" size="100">
+      <input type="submit" value="submit">
+    </form>
+
+    <p id="content"></p>
+    <script type="text/javascript">
+
+      const content = document.querySelector('#content')
+      let tokens = []
+      let atten_ave = []
+      let prompt_len
+      let layer
+      let head 
+
+      document.getElementById('model_form').addEventListener('submit', function(event) {
+          event.preventDefault(); // prevent posting
+          var formData = new FormData(this); // get data
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/model_path', false); // request method
+          xhr.send(formData); 
+          fetchattention()
+      });
+
+      function fetchattention () {
+        fetch('/attention').then(async res => {
+        const data = await res.json()
+        console.log(data)
+        tokens = data.tokens_text
+        atten_ave = data.average_attention_value
+        prompt_len = data.prompt_len
+
+        // create node for every token.If this token is in prompt, make this can't be chosen.
+        tokens.forEach((t, i) => {
+          const token = document.createElement('span')
+          token.innerText = t
+          if (i<prompt_len) {
+            token.classList.add('prompt')
+          }
+          content.appendChild(token)
+        })
+        })
+      }
+
+      const redraw = () => {
+        if (!window.getSelection().isCollapsed) {
+
+          // Mouse choose 
+          const sel = window.getSelection()
+          // choosen token index
+          const Node_behind = sel.anchorNode.parentNode
+          const Node_after = sel.focusNode.parentNode
+          const idx_behind = Array.from(content.children).indexOf(Node_behind)
+          const idx_after = Array.from(content.children).indexOf(Node_after)
+
+          // last token don't have attention martix
+          if (idx_behind === content.children.length-1 || idx_after === content.children.length-1){
+            return
+          } 
+          var checkbox = document.getElementById('ave_attention')
+          Array.from(content.children).forEach((node, i) => {
+            let atten = 0
+            // Decoder only model just see tokens before itself.
+            if (i > idx_after) {
+              atten = 0
+            } else {
+              // use average_atten
+              if (checkbox.checked){
+                for (var j = idx_behind; j <= idx_after; j++) {
+                  if (j>=i){
+                    atten += atten_ave[j-prompt_len][i]
+                  } else {
+                    break
+                  }                 
+                }
+                atten /= (j-idx_behind)
+              }         
+            }
+          node.style.setProperty('--attention', Math.min(1, atten * 5).toFixed(2))
+          })
+          
+        } else {
+          Array.from(content.children).forEach((node, i) => {
+            node.style.setProperty('--attention', '0')
+          })
+        }
+      }
+      document.addEventListener('mouseup', redraw)
+
+    </script>
+  </body>
+</html>
