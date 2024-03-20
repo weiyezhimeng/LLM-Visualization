@@ -55,8 +55,13 @@
     </div>
 
     <form id="model_form" action="/model_path" method="post">
-      Model path:
-      <input type="text" id="model_path" name="model_path" size="100">
+
+      <label for="model_path">Model Path:</label>
+      <input type="text" id="model_path" name="model_path" size="100"><br>
+
+      <label for="prompt">Prompt:</label>
+      <input type="text" id="prompt" name="prompt" size="100"><br>
+
       <input type="submit" value="submit">
     </form>
 
@@ -69,8 +74,19 @@
       let prompt_len
       let layer
       let head 
+      
+      function removeAllSpans() {
+          var spans = document.querySelectorAll('span');
+          if (spans.length === 0) {
+              return;
+          }
+          spans.forEach(function(span) {
+              span.parentNode.removeChild(span);
+          });
+      }
 
       document.getElementById('model_form').addEventListener('submit', function(event) {
+          removeAllSpans()
           event.preventDefault(); // prevent posting
           var formData = new FormData(this); // get data
           var xhr = new XMLHttpRequest();
