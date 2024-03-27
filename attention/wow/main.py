@@ -14,7 +14,6 @@ Q: what is the main point of this text?
 A:
 """.strip()
 
-#/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/BERT_TRAINING_SERVICE/platform/model/gpt2-medium
 path = ""
 device = "cuda:7"
 tokenizer = None
